@@ -17,6 +17,7 @@ app.get("/",(req,res)=>{
 
 app.post("/create",async(req,res)=>{
     const {name, email, password} = req.body
+    await redis.del("user:all")
     const user = await userModel.create({
         name, email, password
     })
@@ -30,9 +31,10 @@ app.get("/fetch",async(req,res)=>{
 
 app.get("/fetch-with-redis",async(req,res)=>{
     const redisdata = await redis.get("user:all")
-    const cachedData = JSON.parse(redisdata)
+    
 
     if(redisdata){
+        const cachedData = JSON.parse(redisdata)
         return res.json(cachedData)
     }
 
