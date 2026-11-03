@@ -43,6 +43,34 @@ app.get("/fetch-with-redis",async(req,res)=>{
     return res.json(user)
 })
 
+app.post("/send-otp",async(req,res)=>{
+    const {email} = req.body
+
+    const otp = Math.floor(100000 + Math.random()*900000).toString()
+    await redis.set(`otp:${email}`,otp,"EX","30")
+    return res.json({otp})
+
+})
+
+app.post("/verity-otp",async(req,res)=>{
+    const {email,otp} = req.body
+    const cachedotp = await redis.get(`otp:${email}`)
+    if(!cachedotp){
+        return res.json({
+            message:"otp not found"
+        })
+    }
+
+    if(cachedotp !== otp){
+        return res.json({
+            message:"otp not matched"
+        })
+    }
+
+    res.json({
+        message:"otp verified"
+    })
+})
 
 app.listen(port,()=>{
     connectDb()
