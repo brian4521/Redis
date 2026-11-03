@@ -4,6 +4,8 @@ import connectDb from "./config/db.js"
 import userModel from "./model/user.model.js"
 import Redis from "ioredis"
 import rateLimiter from "./middleware/ratelimit.js"
+import sendEmail from "./config/sendEmail.js"
+import emailQueue from "./queue.js"
 dotenv.config()
 
 const port=process.env.PORT || 5000
@@ -22,6 +24,9 @@ app.post("/create",async(req,res)=>{
     const user = await userModel.create({
         name, email, password
     })
+
+    await emailQueue.add("sendEmail",{email})
+
     return res.json(user)
 })
 
