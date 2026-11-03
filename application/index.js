@@ -3,6 +3,7 @@ import dotenv from "dotenv"
 import connectDb from "./config/db.js"
 import userModel from "./model/user.model.js"
 import Redis from "ioredis"
+import rateLimiter from "./middleware/ratelimit.js"
 dotenv.config()
 
 const port=process.env.PORT || 5000
@@ -24,7 +25,7 @@ app.post("/create",async(req,res)=>{
     return res.json(user)
 })
 
-app.get("/fetch",async(req,res)=>{
+app.get("/fetch",rateLimiter,async(req,res)=>{
     const user = await userModel.find()
     return res.json(user)
 })

@@ -1,0 +1,24 @@
+import Redis from "ioredis"
+
+
+const redis = new Redis
+const rateLimiter = async(req,res,next)=>{
+
+  const ip = req.ip
+  const key = `rate_limit:${ip}`
+  const requests = await redis.incr(key)
+  if(requests==1){
+    await redis.expire(key,60)
+  }
+  if(requests>5){
+    return res.json({
+      message:"too many requests"
+    })
+
+  }
+
+  next()
+
+}
+
+export default rateLimiter
